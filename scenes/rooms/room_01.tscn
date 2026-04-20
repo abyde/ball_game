@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://buxops3344ec0"]
+
+[ext_resource type="Script" uid="uid://derrbg6tkwoxm" path="res://scripts/exit_trigger.gd" id="1_exit"]
+
+[sub_resource type="PhysicsMaterial" id="FloorPhys"]
+friction = 0.7
+bounce = 0.1
+
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(20, 0.5, 20)
+
+[sub_resource type="BoxMesh" id="FloorMesh"]
+size = Vector3(20, 0.5, 20)
+
+[sub_resource type="StandardMaterial3D" id="FloorMat"]
+albedo_color = Color(1, 1, 1, 1)
+roughness = 0.85
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1ydvn"]
+bounce = 0.4
+
+[sub_resource type="BoxShape3D" id="WallShapeNS"]
+size = Vector3(22, 3, 1)
+
+[sub_resource type="BoxMesh" id="WallMeshNS"]
+size = Vector3(22, 3, 1)
+
+[sub_resource type="StandardMaterial3D" id="WallMat"]
+albedo_color = Color(1.0, 0.85, 0.0, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="WallMatEW"]
+albedo_color = Color(0.85, 0.1, 0.1, 1)
+roughness = 0.9
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_bbo4o"]
+bounce = 0.5
+
+[sub_resource type="BoxShape3D" id="WallShapeEW"]
+size = Vector3(1, 3, 20)
+
+[sub_resource type="BoxMesh" id="WallMeshEW"]
+size = Vector3(1, 3, 20)
+
+[sub_resource type="BoxShape3D" id="ExitShapeNS"]
+size = Vector3(20, 4, 1)
+
+[sub_resource type="BoxShape3D" id="ExitShapeEW"]
+size = Vector3(1, 4, 20)
+
+[sub_resource type="BoxShape3D" id="WallShapeWest"]
+size = Vector3(1, 12, 20)
+
+[sub_resource type="BoxMesh" id="WallMeshWest"]
+size = Vector3(1, 12, 20)
+
+[node name="Room01" type="Node3D" unique_id=1430543274]
+
+[node name="Floor" type="StaticBody3D" parent="." unique_id=805589491]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+physics_material_override = SubResource("FloorPhys")
+
+[node name="Shape" type="CollisionShape3D" parent="Floor" unique_id=735772868]
+shape = SubResource("FloorShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="Floor" unique_id=197127806]
+gi_mode = 0
+mesh = SubResource("FloorMesh")
+surface_material_override/0 = SubResource("FloorMat")
+
+[node name="WallNorth" type="StaticBody3D" parent="." unique_id=1194882188]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -10.5)
+physics_material_override = SubResource("PhysicsMaterial_1ydvn")
+
+[node name="Shape" type="CollisionShape3D" parent="WallNorth" unique_id=2032895679]
+shape = SubResource("WallShapeNS")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallNorth" unique_id=1674075993]
+gi_mode = 0
+mesh = SubResource("WallMeshNS")
+surface_material_override/0 = SubResource("WallMat")
+
+[node name="WallSouth" type="StaticBody3D" parent="." unique_id=586042661]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 10.5)
+physics_material_override = SubResource("PhysicsMaterial_bbo4o")
+
+[node name="Shape" type="CollisionShape3D" parent="WallSouth" unique_id=35449750]
+shape = SubResource("WallShapeNS")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallSouth" unique_id=431753921]
+gi_mode = 0
+mesh = SubResource("WallMeshNS")
+surface_material_override/0 = SubResource("WallMat")
+
+[node name="WallEast" type="StaticBody3D" parent="." unique_id=805519005]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.5, 1.5, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="WallEast" unique_id=1447384047]
+shape = SubResource("WallShapeEW")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallEast" unique_id=2060403389]
+gi_mode = 0
+mesh = SubResource("WallMeshEW")
+surface_material_override/0 = SubResource("WallMatEW")
+
+[node name="WallWest" type="StaticBody3D" parent="." unique_id=1302384742]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.5, 6.0, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="WallWest" unique_id=1138129532]
+shape = SubResource("WallShapeWest")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallWest" unique_id=1565789233]
+gi_mode = 0
+mesh = SubResource("WallMeshWest")
+surface_material_override/0 = SubResource("WallMatEW")
+
+[node name="ExitNorth" type="Area3D" parent="." unique_id=1907895781]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -8.5)
+script = ExtResource("1_exit")
+
+[node name="Shape" type="CollisionShape3D" parent="ExitNorth" unique_id=87220054]
+shape = SubResource("ExitShapeNS")
+
+[node name="ExitSouth" type="Area3D" parent="." unique_id=996605370]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 8.5)
+script = ExtResource("1_exit")
+direction = "south"
+
+[node name="Shape" type="CollisionShape3D" parent="ExitSouth" unique_id=764145322]
+shape = SubResource("ExitShapeNS")
+
+[node name="ExitEast" type="Area3D" parent="." unique_id=1538514730]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 1, 0)
+script = ExtResource("1_exit")
+direction = "east"
+
+[node name="Shape" type="CollisionShape3D" parent="ExitEast" unique_id=1126987224]
+shape = SubResource("ExitShapeEW")
+
+[node name="ExitWest" type="Area3D" parent="." unique_id=599264969]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 1, 0)
+script = ExtResource("1_exit")
+direction = "west"
+
+[node name="Shape" type="CollisionShape3D" parent="ExitWest" unique_id=1071255601]
+shape = SubResource("ExitShapeEW")
+
+[node name="BallStart" type="Node3D" parent="." unique_id=228539343]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7)

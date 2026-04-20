@@ -1,0 +1,12 @@
+# Godot-generated files
+.godot/
+*.translation
+
+# Exported binaries
+export/
+*.apk
+*.aab
+*.ipa
+*.exe
+*.x86_64
+*.app
