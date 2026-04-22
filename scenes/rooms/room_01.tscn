@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://derrbg6tkwoxm" path="res://scripts/exit_trigger.gd" id="1_exit"]
 [ext_resource type="Shader" uid="uid://84geo1wsyyit" path="res://shaders/floor.gdshader" id="2_floor"]
-[ext_resource type="Script" uid="uid://3nejjg2nd0bs" path="res://scripts/quarter_curve.gd" id="3_ramp"]
+[ext_resource type="Script" uid="uid://3nejjg2nd0bs" path="res://scripts/curved_ramp.gd" id="3_ramp"]
 
 [sub_resource type="PhysicsMaterial" id="FloorPhys"]
 friction = 0.7

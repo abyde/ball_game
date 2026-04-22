@@ -1,5 +1,5 @@
 extends StaticBody3D
-# Procedural quarter pipe (circular prism) ramp.
+# Procedural circular prism ramp.
 # Builds its own ArrayMesh and ConcavePolygonShape3D from the export parameters.
 # Attach this script to a StaticBody3D node; no children needed in the scene.
 
