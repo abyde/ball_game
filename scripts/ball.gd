@@ -1,7 +1,7 @@
 extends RigidBody3D
 
 ## Torque applied per physics frame in response to player input.
-@export var torque_strength: float = 15.0
+@export var torque_strength: float = 5.0
 
 ## Maximum angular speed (rad/s) the player input can spin the ball to.
 ## Does not cap physics-induced spinning (e.g. bouncing off walls).
@@ -11,11 +11,19 @@ extends RigidBody3D
 ## In air, damping is 0 — the ball spins freely (conservation of momentum).
 @export var rolling_damp: float = 0.99
 
+## Upward impulse applied when the player jumps (N·s; with mass=1 kg this equals m/s).
+@export var jump_strength: float = 5.0
+
+# timestamp of last jump
+var _last_jumped: int
+# 100 milliseconds cool-down on jumping
+const jump_cooldown: int = 100
+
 # ── Isometric world-space movement directions ────────────────────────────────
-const ISO_FWD   := Vector3(  0.707107, 0.0,  0.707107)  # W  / Up arrow
-const ISO_BACK  := Vector3( -0.707107, 0.0, -0.707107)  # S  / Down arrow
-const ISO_LEFT  := Vector3(  0.707107, 0.0, -0.707107)  # A  / Left arrow
-const ISO_RIGHT := Vector3( -0.707107, 0.0,  0.707107)  # D  / Right arrow
+const ISO_FWD   := Vector3( -0.707107, 0.0,  0.707107)  # W  / Up arrow
+const ISO_BACK  := Vector3(  0.707107, 0.0, -0.707107)  # S  / Down arrow
+const ISO_LEFT  := Vector3(  0.707107, 0.0,  0.707107)  # A  / Left arrow
+const ISO_RIGHT := Vector3( -0.707107, 0.0, -0.707107)  # D  / Right arrow
 
 ## Emitted when the ball falls through the death plane (y < -20).
 signal fell_off_world
@@ -38,9 +46,7 @@ func _integrate_forces(state: PhysicsDirectBodyState3D) -> void:
 	_contact_ids.resize(_num_contacts)
 	for i in _num_contacts:
 		_contact_ids[i] = state.get_contact_collider(i)
-
 	_rolling = _num_contacts > 0
-		
 
 func _physics_process(_delta: float) -> void:
 	# ── Gather input ─────────────────────────────────────────────────────────
@@ -67,6 +73,16 @@ func _physics_process(_delta: float) -> void:
 	if _rolling:
 		angular_velocity = angular_velocity * rolling_damp
 
+	# ── Jump ─────────────────────────────────────────────────────────────────
+	var jump_pressed = Input.is_action_pressed("jump")
+	# Input.is_action_just_pressed("jump"):
+	var jumping = false
+	var now = Time.get_ticks_msec()
+	if _rolling and jump_pressed and now > _last_jumped + jump_cooldown:
+		_last_jumped = now
+		jumping = true
+		apply_central_impulse(Vector3.UP * jump_strength)
+
 	# ── Death plane ───────────────────────────────────────────────────────────
 	if global_position.y < -20.0:
 		fell_off_world.emit()
@@ -75,8 +91,9 @@ func _physics_process(_delta: float) -> void:
 	_dbg_label.text = (
 		"WISH     %s\n" % _fmt(wish) +
 		"ANG VEL  %.2f rad/s  %s\n" % [angular_velocity.length(), _fmt(angular_velocity)] +
-		"SLEEPING %s\n" % sleeping +
 		"ROLLING  %s\n" % _rolling +
+		"LAST JUMP %s\n" % _last_jumped +
+		"JUMPING  %s\n" % jumping +
 		"TORQUE   %s\n" % _dbg_torque_applied +
 		"POS      %s" % _fmt(global_position)
 #		+ "\nContacts %s" % _num_contacts

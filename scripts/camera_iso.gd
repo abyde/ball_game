@@ -13,8 +13,9 @@ extends Camera3D
 @export var view_size: float = 14.0
 
 # Camera sits at  target + ISO_DIR * view_distance  and looks back toward target.
-# (1,1,1) normalized = the classic isometric view axis (45° yaw, ~35.26° pitch).
-const _ISO_DIR := Vector3(0.577350, 0.577350, 0.577350)
+# (-1,1,1) normalized: camera is left-back-above, giving screen-right = (+x,0,+z)/√2
+# so both world X and world Z increase from left to right on screen.
+const _ISO_DIR := Vector3(-0.577350, 0.577350, 0.577350)
 
 func _ready() -> void:
 	projection = PROJECTION_ORTHOGONAL
@@ -36,6 +37,6 @@ func _snap_to_target() -> void:
 	global_position = center + _ISO_DIR * view_distance
 	# look_at the point directly below the camera along the iso axis.
 	# Using Vector3.UP as the "up" hint gives the standard iso orientation:
-	#   screen-right  = world (1, 0, -1) / sqrt(2)
-	#   screen-up     = world (-1, 2, -1) / sqrt(6)
+	#   screen-right  = world (1, 0,  1) / sqrt(2)
+	#   screen-up     = world (1, 2, -1) / sqrt(6)
 	look_at(center, Vector3.UP)

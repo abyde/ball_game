@@ -24,7 +24,8 @@ var _current_room: Node3D    = null
 var _transitioning: bool     = false
 
 func _ready() -> void:
-	_camera.target = _room_container
+	#_camera.target = _room_container
+	_camera.target = _ball
 	_ball.fell_off_world.connect(_respawn_ball)
 	_load_room(_current_room_id)
 

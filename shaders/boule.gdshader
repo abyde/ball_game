@@ -1,7 +1,7 @@
 shader_type spatial;
 
 // ── Appearance parameters (editable in the Inspector) ─────────────────────────
-uniform vec4  ball_color    : source_color = vec4(0.90, 0.92, 0.95, 1.0);  // steel grey
+uniform vec4  ball_color    : source_color = vec4(0.95, 0.97, 0.98, 1.0);  // steel grey
 uniform vec4  ridge_color   : source_color = vec4(0.10, 0.10, 0.11, 1.0);  // dark groove
 uniform float ridge_width   : hint_range(0.005, 0.15) = 0.04;
 uniform float metallic_val  : hint_range(0.0, 1.0)    = 0.92;
@@ -40,12 +40,8 @@ void fragment() {
 	float ridge = 1.0 - smoothstep(0.0, ridge_width, d);   // 1 on ridge, 0 off
 
 	ALBEDO    = clamp(mix(ball_color.rgb, ridge_color.rgb, ridge), 0.0, 1.0);
-	//METALLIC  = metallic_val  * (1.0 - ridge * ridge_depth);
-	//ROUGHNESS = roughness_val + ridge * ridge_depth * 0.7;
-	//SPECULAR  = 0.5;
-	
+	//ALBEDO    = clamp(ball_color.rgb, 0.0, 1.0);
 	METALLIC  = 1.0;
-	ROUGHNESS = 0.0;
-	SPECULAR  = 0.0;
-
+	ROUGHNESS = 0.1;
+	SPECULAR  = 0.1;
 }
