@@ -3,16 +3,15 @@ extends StaticBody3D
 # Builds its own ArrayMesh and ConcavePolygonShape3D from the export parameters.
 # Attach this script to a StaticBody3D node; no children needed in the scene.
 
-@export var x_min  : float = 0.0
 @export var x_max  : float = 1.0
-@export var z_low  : float = 0.0  # z at the low/front end  (y = y_low)
 @export var z_high : float = 1.0  # z at the high/back end  (y = y_high)
-@export var y_low  : float = 0.0
 @export var y_high : float = 1.0
 @export var segments : int = 10
 
 # must be less than or equal to PI/2 or weird shit will happen
 @export var sweep  : float = PI/4
+
+@export var material: Material
 
 func _ready() -> void:
 	_build()
@@ -22,10 +21,9 @@ const sq2 = sqrt(2)
 func _build() -> void:
 	# we're doing a quarter circle, so z_high is at z_low + z_scale/sqrt(2)
 	# ... same for y
-	var z_scale = (z_high - z_low)*sq2
-	var y_scale = (y_high - y_low)*sq2
+	var z_scale = z_high/sin(sweep)
+	var y_scale = y_high/(1-cos(sweep))
 	# center is at z_low, y_low + y_scale
-	var cy = y_low + y_scale
 	var angle_per_face = sweep/segments
 
 	#
@@ -49,12 +47,18 @@ func _build() -> void:
 
 	for f in segments+1:
 		var i = 2*f
-		var angle = f * angle_per_face
-		v[i]   = Vector3(x_min, cy - y_scale * cos(angle), z_low + z_scale * sin(angle))
+		var a = f * angle_per_face
+		v[i]   = Vector3(  0.0, y_scale - cos(a)*y_scale, sin(a)*z_scale)
 		v[i+1] = Vector3(x_max, v[i].y, v[i].z)
-		b[i]   = Vector3(x_min, y_low, v[i].z)
-		b[i+1] = Vector3(x_max, y_low, v[i].z)
-		vn[f]  = Vector3(0.0, cos(angle), -sin(angle))
+		b[i]   = Vector3(  0.0, 0.0, v[i].z)
+		b[i+1] = Vector3(x_max, 0.0, v[i].z)
+
+		# tangent vector is derivative by a, which is
+		# t = (0.0, sin(a)*y_scale, cos(a)*z_scale).normalized()
+		# n = (0.0, cos(a)*z_scale, -sin(a)*y_scale).normalized()
+		# ... note that the scales have flipped
+		# in a scaled world these normals have to be computed carefully
+		vn[f]  = Vector3(0.0, cos(a)*z_scale, -sin(a)*y_scale).normalized()
 
 	# ── Accumulate geometry ───────────────────────────────────────────────────
 	var vdata : Array[Vector3] = []
@@ -81,13 +85,15 @@ func _build() -> void:
 	var arr_mesh := ArrayMesh.new()
 	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(1.0, 0.9, 0.2)
-	mat.roughness = 0.8
-
 	var mi := MeshInstance3D.new()
 	mi.mesh = arr_mesh
-	mi.set_surface_override_material(0, mat)
+	if material:
+		mi.set_surface_override_material(0, material)
+	else:
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(1.0, 0.9, 0.2)
+		mat.roughness = 0.8
+		mi.set_surface_override_material(0, mat)
 	add_child(mi)
 
 	# ── Concave trimesh collision shape ────────────────────────────────────────

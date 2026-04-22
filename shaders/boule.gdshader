@@ -3,7 +3,7 @@ shader_type spatial;
 // ── Appearance parameters (editable in the Inspector) ─────────────────────────
 uniform vec4  ball_color    : source_color = vec4(0.95, 0.97, 0.98, 1.0);  // steel grey
 uniform vec4  ridge_color   : source_color = vec4(0.10, 0.10, 0.11, 1.0);  // dark groove
-uniform float ridge_width   : hint_range(0.005, 0.15) = 0.04;
+uniform float ridge_width   : hint_range(0.005, 0.15) = 0.06;
 uniform float metallic_val  : hint_range(0.0, 1.0)    = 0.92;
 uniform float roughness_val : hint_range(0.0, 1.0)    = 0.08;
 // How much the ridges kill the metallic/reflective quality (0 = no effect).
@@ -26,13 +26,24 @@ void vertex() {
 // Hint: |n.x| is the sine of the angle from the YZ plane, which equals the
 // arc-distance to the great circle for small angles — good enough for seam use.
 
-float ridge_distance(vec3 p) {
+float ridge_distance_simple(vec3 p) {
 	vec3 n = normalize(p);
 
 	float d1 = abs(n.x);   // x = 0  (YZ great circle)
 	float d2 = abs(n.y);   // y = 0  (XZ great circle / equator)
 
 	return min(d1, d2);
+}
+
+float ridge_distance(vec3 p) {
+	vec3 n = normalize(p);
+
+	float sep = 0.2;
+	float d1 = min(abs(n.x + sep), abs(n.x - sep));
+	float d2 = min(abs(n.y + sep), abs(n.y - sep));
+	float d3 = min(abs(n.z + sep), abs(n.z - sep));
+
+	return min(d1, min(d2, d3));
 }
 
 void fragment() {

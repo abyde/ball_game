@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://nj1ecwsfgtuc"]
 
 [ext_resource type="Script" uid="uid://bj70502dv61en" path="res://scripts/ball.gd" id="1_ball"]
-[ext_resource type="Shader" uid="uid://dc1pl1qgxs8um" path="res://shaders/basketball.gdshader" id="3_shader"]
+[ext_resource type="Shader" uid="uid://dmqb6fm32kspu" path="res://shaders/boule.gdshader" id="3_shader"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1"]
 rough = true
@@ -14,12 +14,6 @@ bounce = 0.35
 [sub_resource type="ShaderMaterial" id="BouleMat_1"]
 render_priority = 0
 shader = ExtResource("3_shader")
-shader_parameter/ball_color = Color(0.82, 0.36, 0.07, 1)
-shader_parameter/seam_color = Color(0.07, 0.04, 0.02, 1)
-shader_parameter/seam_width = 0.04
-shader_parameter/pebble_amount = 0.055
-shader_parameter/roughness_val = 0.78
-shader_parameter/specular_val = 0.22
 
 [node name="Ball" type="RigidBody3D" unique_id=222043442]
 physics_material_override = SubResource("PhysicsMaterial_1")
