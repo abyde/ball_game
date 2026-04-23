@@ -24,7 +24,7 @@ enum BallType { BOULE, BASKETBALL }
 @export var jump_strength: float = 5.0
 
 # ── Per-type physics ──────────────────────────────────────────────────────────
-const _BOULE_MASS     := 3.0   # kg  — heavy polished metal
+const _BOULE_MASS     := 1.5   # kg  — polished metal
 const _BOULE_FRICTION := 0.3   # low — smooth surface
 const _BOULE_BOUNCE   := 0.2   # metal barely bounces
 # rough=false → multiply combine: boule friction always wins against rough floors
@@ -34,11 +34,16 @@ const _BBALL_FRICTION := 1.5   # high — grippy rubber (>1 is valid in Godot)
 const _BBALL_BOUNCE   := 0.7   # rubber bounces well
 # rough=true → max combine: basketball stays grippy on any surface
 
+const _BOULE_SCALE := 1.0 / 3.0  # boule is 1/3 the radius of a basketball
+const _BBALL_SCALE := 1.0
+
 const _BOULE_SHADER      := preload("res://shaders/boule.gdshader")
 const _BASKETBALL_SHADER := preload("res://shaders/basketball.gdshader")
 
 var _boule_mat: ShaderMaterial
 var _basketball_mat: ShaderMaterial
+var _size_tween: Tween
+var _force_scale := 1.0  # multiplier on torque/jump — set per ball type
 
 # timestamp of last jump
 var _last_jumped: int
@@ -70,11 +75,11 @@ func _ready() -> void:
 	_basketball_mat = ShaderMaterial.new()
 	_basketball_mat.shader = _BASKETBALL_SHADER
 
-	_apply_ball_type()
+	_apply_ball_type(true)   # snap to correct size immediately — no animation on startup
 	add_to_group("ball")
 	_build_debug_overlay()
 
-func _apply_ball_type() -> void:
+func _apply_ball_type(instant: bool = false) -> void:
 	var mi := $MeshInstance3D as MeshInstance3D
 	match ball_type:
 		BallType.BOULE:
@@ -83,12 +88,30 @@ func _apply_ball_type() -> void:
 			physics_material_override.friction = _BOULE_FRICTION
 			physics_material_override.bounce   = _BOULE_BOUNCE
 			physics_material_override.rough    = false
+			_force_scale = 2.0
 		BallType.BASKETBALL:
 			mi.set_surface_override_material(0, _basketball_mat)
 			mass = _BBALL_MASS
 			physics_material_override.friction = _BBALL_FRICTION
 			physics_material_override.bounce   = _BBALL_BOUNCE
 			physics_material_override.rough    = true
+			_force_scale = 1.0
+	var target := _BOULE_SCALE if ball_type == BallType.BOULE else _BBALL_SCALE
+	if instant:
+		_set_ball_scale(target)
+	else:
+		_animate_ball_scale(target)
+
+func _animate_ball_scale(target: float) -> void:
+	if _size_tween:
+		_size_tween.kill()
+	_size_tween = create_tween()
+	_size_tween.tween_method(_set_ball_scale, $MeshInstance3D.scale.x, target, 0.2)
+
+func _set_ball_scale(s: float) -> void:
+	var sv := Vector3(s, s, s)
+	$MeshInstance3D.scale    = sv
+	$CollisionShape3D.scale  = sv
 
 # ── Physics callbacks ─────────────────────────────────────────────────────────
 
@@ -117,7 +140,7 @@ func _physics_process(_delta: float) -> void:
 
 		var ang_in_dir := angular_velocity.dot(t_axis.normalized())
 		if ang_in_dir < max_angular_speed:
-			apply_torque(t_axis * torque_strength)
+			apply_torque(t_axis * torque_strength * _force_scale)
 			_dbg_torque_applied = true
 
 	# ── Friction ────────────
@@ -132,7 +155,7 @@ func _physics_process(_delta: float) -> void:
 	if _rolling and jump_pressed and now > _last_jumped + jump_cooldown:
 		_last_jumped = now
 		jumping = true
-		apply_central_impulse(Vector3.UP * jump_strength)
+		apply_central_impulse(Vector3.UP * jump_strength * _force_scale)
 
 	# ── Ball type toggle ─────────────────────────────────────────────────────────
 	if Input.is_action_just_pressed("toggle_ball_type"):
